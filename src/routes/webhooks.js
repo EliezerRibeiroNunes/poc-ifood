@@ -3,8 +3,10 @@ import { broadcastQueue, mapStatus } from '../services/queue.js';
 
 export default async function webhooksRoutes(fastify, opts) {
   fastify.post('/webhooks/ifood', async (request, reply) => {
-    const signature = request.headers['x-ifood-signature'];
-    if (!signature || signature !== process.env.WEBHOOK_SECRET) {
+    const clientId = request.headers['x-ifood-client-id'];
+    const allowedClientId = process.env.IFOOD_CLIENT_ID;
+
+    if (!allowedClientId || clientId !== allowedClientId) {
       return reply.code(401).send({ error: 'invalid signature' });
     }
 
