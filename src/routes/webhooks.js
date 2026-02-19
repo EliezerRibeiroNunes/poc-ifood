@@ -3,6 +3,14 @@ import { broadcastQueue, mapStatus } from '../services/queue.js';
 
 export default async function webhooksRoutes(fastify, opts) {
   fastify.post('/webhooks/ifood', async (request, reply) => {
+    fastify.log.info(
+      {
+        headers: request.headers,
+        body: request.body
+      },
+      'Webhook received'
+    );
+    
     const clientId = request.headers['x-ifood-client-id'];
     const allowedClientId = process.env.IFOOD_CLIENT_ID;
 
