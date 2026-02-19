@@ -11,10 +11,10 @@ export default async function webhooksRoutes(fastify, opts) {
       'Webhook received'
     );
     
-    const clientId = request.headers['x-ifood-client-id'];
-    const allowedClientId = process.env.IFOOD_CLIENT_ID;
+    const signature = request.headers['x-ifood-signature'];
+    const secret = process.env.WEBHOOK_SECRET;
 
-    if (!allowedClientId || clientId !== allowedClientId) {
+    if (!secret || signature !== secret) {
       return reply.code(401).send({ error: 'invalid signature' });
     }
 
