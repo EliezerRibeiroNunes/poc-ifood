@@ -7,6 +7,20 @@ import { broadcastQueue } from './services/queue.js';
 
 const fastify = Fastify({ logger: true });
 
+fastify.addContentTypeParser(
+  'application/json',
+  { parseAs: 'buffer' },
+  (request, body, done) => {
+    request.rawBody = body;
+    try {
+      const parsed = JSON.parse(body.toString('utf8'));
+      done(null, parsed);
+    } catch (err) {
+      done(err, undefined);
+    }
+  }
+);
+
 await fastify.register(fastifySocketIO, {
   cors: {
     origin: '*'

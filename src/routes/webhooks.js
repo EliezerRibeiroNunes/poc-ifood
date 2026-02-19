@@ -1,5 +1,6 @@
 import { withClient } from '../db.js';
 import { broadcastQueue, mapStatus } from '../services/queue.js';
+import crypto from 'node:crypto';
 
 export default async function webhooksRoutes(fastify, opts) {
   fastify.post('/webhooks/ifood', async (request, reply) => {
@@ -10,17 +11,29 @@ export default async function webhooksRoutes(fastify, opts) {
       },
       'Webhook received'
     );
-    
     const signature = request.headers['x-ifood-signature'];
     const secret = process.env.WEBHOOK_SECRET;
+    const rawBody = request.rawBody;
 
-    if (!secret || signature !== secret) {
+    if (!secret || !signature || !rawBody) {
+      return reply.code(401).send({ error: 'invalid signature' });
+    }
+
+    const expected = crypto
+      .createHmac('sha256', secret)
+      .update(rawBody)
+      .digest('hex');
+
+    const sigBuf = Buffer.from(signature, 'hex');
+    const expBuf = Buffer.from(expected, 'hex');
+
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
       return reply.code(401).send({ error: 'invalid signature' });
     }
 
     const payload = request.body || {};
     const providerOrderId = payload.orderId || payload.provider_order_id;
-    const providerStatus = payload.status;
+    const providerStatus = payload.status || payload.fullCode || payload.code;
     if (!providerOrderId || !providerStatus) {
       return reply.code(400).send({ error: 'missing orderId or status' });
     }

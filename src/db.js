@@ -6,6 +6,8 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
 
+// Note: Supabase transaction pooler doesn't support PREPARE statements.
+
 export async function query(text, params) {
   const res = await pool.query(text, params);
   return res;

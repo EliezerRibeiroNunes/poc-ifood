@@ -2,6 +2,7 @@ import { query } from '../db.js';
 
 export function mapStatus(providerStatus) {
   const status = String(providerStatus || '').toUpperCase();
+  if (status === 'PLACED' || status === 'PLC') return 'ACCEPTED';
   if (status === 'ACCEPTED') return 'ACCEPTED';
   if (status === 'IN_PRODUCTION') return 'IN_PRODUCTION';
   if (status === 'READY') return 'READY';

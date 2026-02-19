@@ -1,22 +1,8 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: ifood
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
   api:
     build: .
     env_file:
       - .env
-    depends_on:
-      - db
     ports:
       - "3000:3000"
     command: ["sh", "-c", "npm run migrate && npm start"]
-volumes:
-  pgdata:
